@@ -1,0 +1,473 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "retail-etl-dev"
+        },
+        "Ls_ADLS_Retail_accountKey": {
+            "type": "secureString",
+            "metadata": "Secure string for 'accountKey' of 'Ls_ADLS_Retail'"
+        },
+        "Ls_ADLS_Retail_properties_typeProperties_url": {
+            "type": "string",
+            "defaultValue": "https://retailetlstorage12345.dfs.core.windows.net/"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/Ls_ADLS_Retail')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[parameters('Ls_ADLS_Retail_properties_typeProperties_url')]",
+                    "accountKey": {
+                        "type": "SecureString",
+                        "value": "[parameters('Ls_ADLS_Retail_accountKey')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_customerinfo')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Ls_ADLS_Retail",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": "customer_info.csv",
+                        "folderPath": "raw",
+                        "fileSystem": "retail"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "customer_id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "email",
+                        "type": "String"
+                    },
+                    {
+                        "name": "signup_date",
+                        "type": "String"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "String"
+                    },
+                    {
+                        "name": "region",
+                        "type": "String"
+                    },
+                    {
+                        "name": "loyalty_tier",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Ls_ADLS_Retail')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_productinfo')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Ls_ADLS_Retail",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": "product_info.csv",
+                        "folderPath": "raw",
+                        "fileSystem": "retail"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "product_id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "product_name",
+                        "type": "String"
+                    },
+                    {
+                        "name": "category",
+                        "type": "String"
+                    },
+                    {
+                        "name": "launch_date",
+                        "type": "String"
+                    },
+                    {
+                        "name": "base_price",
+                        "type": "String"
+                    },
+                    {
+                        "name": "supplier_code",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Ls_ADLS_Retail')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/dDS_salesinfo')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Ls_ADLS_Retail",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": "sales_data.csv",
+                        "folderPath": "raw",
+                        "fileSystem": "retail"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "order_id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "customer_id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "product_id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "quantity",
+                        "type": "String"
+                    },
+                    {
+                        "name": "unit_price",
+                        "type": "String"
+                    },
+                    {
+                        "name": "order_date",
+                        "type": "String"
+                    },
+                    {
+                        "name": "delivery_status",
+                        "type": "String"
+                    },
+                    {
+                        "name": "payment_method",
+                        "type": "String"
+                    },
+                    {
+                        "name": "region",
+                        "type": "String"
+                    },
+                    {
+                        "name": "discount_applied",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Ls_ADLS_Retail')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/PL_copy_raw_to_silver')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Get_bronze_files",
+                        "type": "GetMetadata",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataset": {
+                                "referenceName": "DS_bronze_folder",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            },
+                            "fieldList": [
+                                "childItems"
+                            ],
+                            "storeSettings": {
+                                "type": "AzureBlobFSReadSettings",
+                                "enablePartitionDiscovery": false
+                            },
+                            "formatSettings": {
+                                "type": "BinaryReadSettings"
+                            }
+                        }
+                    },
+                    {
+                        "name": "ForEach1",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get_bronze_files",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get_bronze_files').output.childItems",
+                                "type": "Expression"
+                            },
+                            "activities": [
+                                {
+                                    "name": "Copy_file",
+                                    "type": "Copy",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "0.12:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "DelimitedTextSource",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSReadSettings",
+                                                "recursive": true,
+                                                "enablePartitionDiscovery": false
+                                            },
+                                            "formatSettings": {
+                                                "type": "DelimitedTextReadSettings"
+                                            }
+                                        },
+                                        "sink": {
+                                            "type": "DelimitedTextSink",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSWriteSettings"
+                                            },
+                                            "formatSettings": {
+                                                "type": "DelimitedTextWriteSettings",
+                                                "quoteAllText": true,
+                                                "fileExtension": ".txt"
+                                            }
+                                        },
+                                        "enableStaging": false,
+                                        "translator": {
+                                            "type": "TabularTranslator",
+                                            "typeConversion": true,
+                                            "typeConversionSettings": {
+                                                "allowDataTruncation": true,
+                                                "treatBooleanAsNumber": false
+                                            }
+                                        }
+                                    },
+                                    "inputs": [
+                                        {
+                                            "referenceName": "DS_bronze_file",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "FolderName": "raw",
+                                                "FileName": {
+                                                    "value": "@item().name",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "outputs": [
+                                        {
+                                            "referenceName": "DS_silver",
+                                            "type": "DatasetReference",
+                                            "parameters": {}
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/DS_bronze_folder')]",
+                "[concat(variables('factoryId'), '/datasets/DS_bronze_file')]",
+                "[concat(variables('factoryId'), '/datasets/DS_silver')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_silver')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Ls_ADLS_Retail",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "folderPath": "silver",
+                        "fileSystem": "retail"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Ls_ADLS_Retail')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_bronze_file')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Ls_ADLS_Retail",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "FolderName": {
+                        "type": "string"
+                    },
+                    "FileName": {
+                        "type": "string"
+                    }
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().FileName",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().FolderName",
+                            "type": "Expression"
+                        },
+                        "fileSystem": "retail"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "customer_id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "email",
+                        "type": "String"
+                    },
+                    {
+                        "name": "signup_date",
+                        "type": "String"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "String"
+                    },
+                    {
+                        "name": "region",
+                        "type": "String"
+                    },
+                    {
+                        "name": "loyalty_tier",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Ls_ADLS_Retail')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_bronze_folder')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Ls_ADLS_Retail",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "Binary",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "folderPath": "raw",
+                        "fileSystem": "retail"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Ls_ADLS_Retail')]"
+            ]
+        }
+    ]
+}
